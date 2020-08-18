@@ -1,0 +1,19 @@
+.text-container {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    background-color:whitesmoke;
+  }
+
+  .bg-light{
+    background-color:white !important;
+}
+
+  .nav-link {
+    font-family: "Comic Sans MS", "Times New Roman";
+  }
+
+  .navbar-light .navbar-nav .nav-link {
+    color: rgb(177, 100, 164);
+  }
