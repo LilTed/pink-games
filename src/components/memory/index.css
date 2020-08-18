@@ -1,0 +1,15 @@
+.game-container {
+  width: 50vw;
+  margin: 5vw auto;
+}
+
+.memory-grid {
+  height: 40vw;
+  display: grid;
+  grid-template-rows: repeat(4, auto);
+  grid-template-columns: repeat(4, auto);
+  grid-gap: 0.8vw;
+  margin-top:1vw;
+}
+
+

@@ -1,0 +1,63 @@
+.memory-card {
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: rgb(252, 245, 251);
+  }
+
+  .pink {
+    background: url("./images/Gizmo.jpg");
+    height: 100%; width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+  }
+  .red {
+    background: url("./images/Gizmo2.jpg");
+    height: 100%; width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .orange {
+    background: url("./images/Gizmo3.jpg");
+    height: 100%; width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .yellow {
+    background: url("./images/Molly.jpg");
+    height: 100%; width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .teal {
+    background: url("./images/Sookie.jpg");
+    height: 100%; width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .green {
+    background: url("./images/Sookie2.jpg");
+    height: 100%; width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .blue {
+    background: url("./images/Sookie3.jpg");
+    height: 100%; width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .purple {
+    background: url("./images/storochliten.jpg");
+    height: 100%; width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }

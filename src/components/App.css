@@ -4,6 +4,7 @@
     width: 100%;
     text-align: center;
     background-color:whitesmoke;
+    font-family: "Myriad", "Times New Roman";
   }
 
   .bg-light{
@@ -11,7 +12,12 @@
 }
 
   .nav-link {
-    font-family: "Comic Sans MS", "Times New Roman";
+    font-family: "Myriad", "Times New Roman";
+    font-weight: bold;
+  }
+
+  .navbar-brand {
+    font-family: "Myriad", "Times New Roman";
   }
 
   .navbar-light .navbar-nav .nav-link {
