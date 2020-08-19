@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import "./index.css";
 import StatusBar from "./StatusBar";
 import MemoryCard from "./MemoryCard";
