@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./index.css";
 import StatusBar from "./StatusBar";
 import MemoryCard from "./MemoryCard";
@@ -30,24 +30,39 @@ function generateCards() {
   return cards.sort(() => Math.random() - 0.5);
 }
 
-function flipCard(cards, cardToFlip) {
+function flipCard(cards, keysToFlip) {
+  return cards.map((card) => {
+    return {
+      ...card,
+      isFlipped: keysToFlip.includes(card.key)
+        ? !card.isFlipped
+        : card.isFlipped,
+    };
+  });
+}
+/*function flipCard(cards, cardToFlip) {
   return cards.map((card) => {
     if (card.key === cardToFlip.key)
       return { ...card, isFlipped: !card.isFlipped };
     return card;
   });
 }
-
+*/
 function Memory() {
+  const [startTime, setStartTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [wrongPair, setWrongPair] = useState(null);
+  const timeoutIds = useRef([]);
   //const [cards, setCards] = useState(generateCards()); [<current state><function to update state>] = useState(<initial state>)
   const [game, setGame] = useState({
     cards: generateCards(),
     firstCard: undefined,
-    secondCard: undefined,
   });
 
-  function onCardClicked(card) {
-    // If the card is already flipped there is nothing we need to do (write an if-statement with a return; inside)
+  /*function onCardClicked(card) {
+    setStartTime(oldStartTime =>
+        oldStartTime === 0 ? Date.now() : oldStartTime);
+      // If the card is already flipped there is nothing we need to do (write an if-statement with a return; inside)
     if (card.isFlipped) {
       return;
     }
@@ -89,9 +104,62 @@ function Memory() {
       }
     });
   }
+  */
+  function onCardClicked(card) {
+    if (card.isFlipped) {
+      return;
+    }
+    setGame(({ cards, firstCard }) => {
+      const newCards = flipCard(cards, [card.key]);
+      if (!firstCard) {
+        return {
+          cards: newCards,
+          firstCard: card,
+        };
+      } else {
+        if (firstCard.color !== card.color) {
+          setWrongPair([firstCard, card]);
+        }
+        return {
+          cards: newCards,
+        };
+      }
+    });
+    if (startTime === 0) setStartTime(Date.now());
+  }
+
+  useEffect(() => {
+    if (startTime !== 0) {
+      const intervalId = setInterval(() => {
+        setElapsedTime(Date.now() - startTime);
+      }, 1000);
+      return () => clearInterval(intervalId);
+    }
+  }, [startTime]);
+
+  useEffect(() => {
+    if (!wrongPair) return;
+    const timeoutId = setTimeout(() => {
+      setGame((oldGame) => {
+        return {
+          ...oldGame,
+          cards: flipCard(
+            oldGame.cards,
+            wrongPair.map((card) => card.key)
+          ),
+        };
+      });
+    }, 1000);
+
+    timeoutIds.current = timeoutIds.current.concat(timeoutIds.current);
+  }, [wrongPair]);
 
   /* Runs when the restart button is clicked, resets the state with new cards */
   function onRestart() {
+    setStartTime(0);
+    setElapsedTime(0);
+    timeoutIds.current.forEach((id) => clearTimeout(id));
+    timeoutIds.current = [];
     setGame({
       cards: generateCards(),
       firstCard: undefined,
@@ -100,7 +168,7 @@ function Memory() {
   }
   return (
     <div className="game-container">
-      <StatusBar status="Time: 0s" onRestart={onRestart}></StatusBar>
+      <StatusBar status={`Time: ${elapsedTime}ms`} onRestart={onRestart} />
       <div className="memory-grid">
         {game.cards.map((card) => (
           <MemoryCard
