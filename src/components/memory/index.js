@@ -48,6 +48,20 @@ function flipCard(cards, keysToFlip) {
   });
 }
 */
+
+function msToTime(duration) {
+    var milliseconds = parseInt((duration % 1000) / 100),
+      seconds = Math.floor((duration / 1000) % 60),
+      minutes = Math.floor((duration / (1000 * 60)) % 60),
+      hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+  
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+  
+    return /*hours + " h " + */minutes + " min " + seconds + " s";
+  }
+
 function Memory() {
   const [startTime, setStartTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -168,7 +182,7 @@ function Memory() {
   }
   return (
     <div className="game-container">
-      <StatusBar status={`Time: ${elapsedTime}ms`} onRestart={onRestart} />
+      <StatusBar status={`Time: ${msToTime(elapsedTime)}`} onRestart={onRestart} />
       <div className="memory-grid">
         {game.cards.map((card) => (
           <MemoryCard
