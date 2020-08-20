@@ -3,6 +3,8 @@ import "./index.css";
 import StatusBar from "./StatusBar";
 import MemoryCard from "./MemoryCard";
 import * as utils from "../../utils";
+import ResultModal from "./ResultModal";
+
 const colors = [
   "pink",
   "red",
@@ -20,16 +22,28 @@ function generateCards() {
       key: i * 2,
       color: colors[i],
       isFlipped: false,
+      isLocked: false,
     });
     cards.push({
       key: i * 2 + 1,
       color: colors[i],
       isFlipped: false,
+      isLocked: false,
     });
   }
   return cards.sort(() => Math.random() - 0.5);
 }
-
+function lockCards(cards, keysToLock) {
+  return cards.map((card) => {
+    if (keysToLock.includes(card.key)) {
+      return {
+        ...card,
+        isLocked: true,
+      };
+    }
+    return card;
+  });
+}
 function flipCard(cards, keysToFlip) {
   return cards.map((card) => {
     return {
@@ -40,14 +54,6 @@ function flipCard(cards, keysToFlip) {
     };
   });
 }
-/*function flipCard(cards, cardToFlip) {
-  return cards.map((card) => {
-    if (card.key === cardToFlip.key)
-      return { ...card, isFlipped: !card.isFlipped };
-    return card;
-  });
-}
-*/
 
 function msToTime(duration) {
   var milliseconds = parseInt((duration % 1000) / 100),
@@ -69,6 +75,7 @@ function Memory() {
   const [startTime, setStartTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [win, setWin] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [wrongPair, setWrongPair] = useState(null);
   const timeoutIds = useRef([]);
   //const [cards, setCards] = useState(generateCards()); [<current state><function to update state>] = useState(<initial state>)
@@ -129,7 +136,7 @@ function Memory() {
     }
 
     setGame(({ cards, firstCard }) => {
-      const newCards = flipCard(cards, [card.key]);
+      let newCards = flipCard(cards, [card.key]);
       if (!firstCard) {
         return {
           cards: newCards,
@@ -138,19 +145,24 @@ function Memory() {
       } else {
         if (firstCard.color !== card.color) {
           setWrongPair([firstCard, card]);
-        }
-        let isAllCardsFlipped = newCards.every((card) => card.isFlipped);
-        if (isAllCardsFlipped) {
-          setWin(true);
-          //setStartTime(0);
-          //alert("You won!");
+        } else {
+          newCards = lockCards(newCards, [firstCard.key, card.key]);
+          if (newCards.every((card) => card.isLocked)) {
+            setWin(true);
+            setShowModal(true);
+          }
         }
         return {
           cards: newCards,
         };
       }
     });
-    if (startTime === 0) setStartTime(Date.now());
+    setStartTime((oldStartTime) => {
+      if (oldStartTime === 0) {
+        return Date.now();
+      }
+      return oldStartTime;
+    });
   }
 
   useEffect(() => {
@@ -162,29 +174,22 @@ function Memory() {
     }
   }, [startTime, win]);
 
-  /*useEffect(() => {
-      if (win) return {
-          setStartTime(0),
-          alert("You won!"),
-      }
-     setWin(cards.every((card) => card.isFlipped));
-  }
-*/
+ 
   useEffect(() => {
     if (!wrongPair) return;
     const timeoutId = setTimeout(() => {
       setGame((oldGame) => {
+        const newCards = flipCard(
+          oldGame.cards,
+          wrongPair.map((card) => card.key)
+        );
         return {
           ...oldGame,
-          cards: flipCard(
-            oldGame.cards,
-            wrongPair.map((card) => card.key)
-          ),
+          cards: newCards,
         };
       });
     }, 1000);
-
-    timeoutIds.current = timeoutIds.current.concat(timeoutIds.current);
+    timeoutIds.current = timeoutIds.current.concat(timeoutId);
   }, [wrongPair]);
 
   useEffect(() => {
@@ -195,7 +200,6 @@ function Memory() {
           time: elapsedTime,
         })
         .then(() => console.log("Score saved"));
-        
     }
   }, [win]);
   /* Runs when the restart button is clicked, resets the state with new cards */
@@ -227,6 +231,12 @@ function Memory() {
           />
         ))}
       </div>
+      <ResultModal
+        show={showModal}
+        header="Congratulations, you won!"
+        body={"Your time was " + msToTime(elapsedTime) + "."}
+        handleClose={() => setShowModal(false)}
+      ></ResultModal>
     </div>
   );
 }
