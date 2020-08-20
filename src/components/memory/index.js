@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./index.css";
 import StatusBar from "./StatusBar";
 import MemoryCard from "./MemoryCard";
-
+import * as utils from "../../utils";
 const colors = [
   "pink",
   "red",
@@ -50,21 +50,25 @@ function flipCard(cards, keysToFlip) {
 */
 
 function msToTime(duration) {
-    var milliseconds = parseInt((duration % 1000) / 100),
-      seconds = Math.floor((duration / 1000) % 60),
-      minutes = Math.floor((duration / (1000 * 60)) % 60),
-      hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-  
-    hours = (hours < 10) ? "0" + hours : hours;
-    minutes = (minutes < 10) ? "0" + minutes : minutes;
-    seconds = (seconds < 10) ? "0" + seconds : seconds;
-  
-    return /*hours + " h " + */minutes + " min " + seconds + " s";
-  }
+  var milliseconds = parseInt((duration % 1000) / 100),
+    seconds = Math.floor((duration / 1000) % 60),
+    minutes = Math.floor((duration / (1000 * 60)) % 60),
+    hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+  hours = hours < 10 ? "0" + hours : hours;
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  seconds = seconds < 10 ? "0" + seconds : seconds;
+
+  return /*hours + " h " + */ minutes + " min " + seconds + " s";
+}
 
 function Memory() {
+  utils
+    .fetchLeaderboard("memory")
+    .then((leaderboard) => console.log(leaderboard));
   const [startTime, setStartTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [win, setWin] = useState(false);
   const [wrongPair, setWrongPair] = useState(null);
   const timeoutIds = useRef([]);
   //const [cards, setCards] = useState(generateCards()); [<current state><function to update state>] = useState(<initial state>)
@@ -84,7 +88,7 @@ function Memory() {
     setGame(({ cards, firstCard, secondCard }) => {
       // The { cards, firstCard, secondCard } above is the decomposed game object.
       // These three variables represent the previous state, before a card was clicked.
-      // We should return the new state, depending on the previous one and on the card that was clicked.
+      // We should return the new state, depending on the previous one and on the card that was clicked.+
       // There are 4 different cases.
       // 1. If both firstCard and secondCard from the previous state are undefined =>
       // we should flip the clicked card and set it as the firstCard
@@ -123,6 +127,7 @@ function Memory() {
     if (card.isFlipped) {
       return;
     }
+
     setGame(({ cards, firstCard }) => {
       const newCards = flipCard(cards, [card.key]);
       if (!firstCard) {
@@ -134,6 +139,12 @@ function Memory() {
         if (firstCard.color !== card.color) {
           setWrongPair([firstCard, card]);
         }
+        let isAllCardsFlipped = newCards.every((card) => card.isFlipped);
+        if (isAllCardsFlipped) {
+          setWin(true);
+          //setStartTime(0);
+          //alert("You won!");
+        }
         return {
           cards: newCards,
         };
@@ -143,14 +154,22 @@ function Memory() {
   }
 
   useEffect(() => {
-    if (startTime !== 0) {
+    if (startTime !== 0 && !win) {
       const intervalId = setInterval(() => {
         setElapsedTime(Date.now() - startTime);
       }, 1000);
       return () => clearInterval(intervalId);
     }
-  }, [startTime]);
+  }, [startTime, win]);
 
+  /*useEffect(() => {
+      if (win) return {
+          setStartTime(0),
+          alert("You won!"),
+      }
+     setWin(cards.every((card) => card.isFlipped));
+  }
+*/
   useEffect(() => {
     if (!wrongPair) return;
     const timeoutId = setTimeout(() => {
@@ -168,10 +187,22 @@ function Memory() {
     timeoutIds.current = timeoutIds.current.concat(timeoutIds.current);
   }, [wrongPair]);
 
+  useEffect(() => {
+    if (win) {
+      utils
+        .saveScore("memory", {
+          name: "Lina",
+          time: elapsedTime,
+        })
+        .then(() => console.log("Score saved"));
+        
+    }
+  }, [win]);
   /* Runs when the restart button is clicked, resets the state with new cards */
   function onRestart() {
     setStartTime(0);
     setElapsedTime(0);
+    setWin(false);
     timeoutIds.current.forEach((id) => clearTimeout(id));
     timeoutIds.current = [];
     setGame({
@@ -182,7 +213,10 @@ function Memory() {
   }
   return (
     <div className="game-container">
-      <StatusBar status={`Time: ${msToTime(elapsedTime)}`} onRestart={onRestart} />
+      <StatusBar
+        status={`Time: ${msToTime(elapsedTime)}`}
+        onRestart={onRestart}
+      />
       <div className="memory-grid">
         {game.cards.map((card) => (
           <MemoryCard
