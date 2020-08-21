@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./index.css";
-import * as helpers from "./helpers.js";
+import * as helpers from "../helpers.js";
+import ResultModal from "../ResultModal";
 
 const width = 20;
 const height = 12;
@@ -8,6 +9,8 @@ const height = 12;
 function Snake() {
   const [game, setGame] = useState(helpers.generateGame());
   const [gameOver, setGameOver] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
   useEffect(() => {
     const intervalId = setInterval(
       () => setGame((oldGame) => {
@@ -76,6 +79,11 @@ function Snake() {
   return (
     <div className="game-container">
       <div className="snake-grid">{cells}</div>
+      <ResultModal
+      show={showModal} handleClose={() => setShowModal(false)}
+      header={"You lost!"}
+        body={"Your score was:"}
+      ></ResultModal>
     </div>
   );
 }

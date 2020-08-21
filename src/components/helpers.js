@@ -1,3 +1,5 @@
+import * as utils from "../utils";
+
 const width = 20;
 const height = 12;
 
@@ -54,7 +56,7 @@ function generateNewHead(oldSnake) {
       newHead = { x: oldSnake.head.x + 1, y: oldSnake.head.y };
       break;
     case "down":
-      newHead = { x: oldSnake.head.x, y: oldSnake.head.y + 1 };  
+      newHead = { x: oldSnake.head.x, y: oldSnake.head.y + 1 };
       break;
     case "left":
       newHead = { x: oldSnake.head.x - 1, y: oldSnake.head.y };
@@ -68,7 +70,7 @@ function generateNewHead(oldSnake) {
 function generateNewTail(oldSnake, oldFood, newHead) {
   // Create a variable newTail (an array). Its first cell should be the old snake's head
   // and the rest of the cells should be the old snake's tail. Use concat() function
-  // to add (append) a whole array to another array. Or you can use the [...myArray] syntax somehow... :) 
+  // to add (append) a whole array to another array. Or you can use the [...myArray] syntax somehow... :)
   let newTail = [oldSnake.head].concat(oldSnake.tail);
   // Now the snake's tail has become longer! We should keep it like that if the snake has eaten,
   // otherwise we need to shorten it (remove the last element). Use the pop() function.
@@ -92,11 +94,25 @@ export function generateFood(snake) {
   }
   return food;
 }
-export function isGameOver(game){
-    const snake = game.snake;
-    return isOutOfBounds(snake.head) || snake.tail.some((cell) => isEqual(cell, snake.head));
-
+export function isGameOver(game) {
+  const snake = game.snake;
+  return (
+    isOutOfBounds(snake.head) ||
+    snake.tail.some((cell) => isEqual(cell, snake.head))
+  );
 }
 function isOutOfBounds(cell) {
-    return cell.x<0 || cell.x>=width || cell.y<0 || cell>=height
+  return cell.x < 0 || cell.x >= width || cell.y < 0 || cell >= height;
+}
+
+export function fetchLeaderboard() {
+  return utils
+    .fetchLeaderboard("memory", [["time", "asc"]])
+    .then((leaderboard) =>
+      leaderboard.map((score, i) => `${i + 1}.${score.name}:${score.time}ms`)
+    );
+}
+
+export function saveScore(name, time) {
+  utils.saveScore("memory", {name, time});
 }

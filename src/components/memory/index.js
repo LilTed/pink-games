@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./index.css";
-import StatusBar from "./StatusBar";
+import StatusBar from "../StatusBar";
 import MemoryCard from "./MemoryCard";
 import * as utils from "../../utils";
-import ResultModal from "./ResultModal";
+import ResultModal from "../ResultModal";
+import * as helpers from "../helpers.js";
 
 const colors = [
   "pink",
@@ -75,7 +76,7 @@ function Memory() {
   const [startTime, setStartTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [win, setWin] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true);
   const [wrongPair, setWrongPair] = useState(null);
   const timeoutIds = useRef([]);
   //const [cards, setCards] = useState(generateCards()); [<current state><function to update state>] = useState(<initial state>)
@@ -194,12 +195,7 @@ function Memory() {
 
   useEffect(() => {
     if (win) {
-      utils
-        .saveScore("memory", {
-          name: "Lina",
-          time: elapsedTime,
-        })
-        .then(() => console.log("Score saved"));
+      setShowModal(true);
     }
   }, [win]);
   /* Runs when the restart button is clicked, resets the state with new cards */
@@ -236,6 +232,8 @@ function Memory() {
         header="Congratulations, you won!"
         body={"Your time was " + msToTime(elapsedTime) + "."}
         handleClose={() => setShowModal(false)}
+        fetchLeaderboard={helpers.fetchLeaderboard}
+        saveScore = {(name) => helpers.saveScore(name, elapsedTime)}
       ></ResultModal>
     </div>
   );
