@@ -7,10 +7,21 @@ const height = 12;
 
 function Snake() {
   const [game, setGame] = useState(helpers.generateGame());
+  const [gameOver, setGameOver] = useState(false);
   useEffect(() => {
-    const intervalId = setInterval(() => setGame(oldGame =>helpers.tick(game)), 400);
+    const intervalId = setInterval(
+      () => setGame((oldGame) => {
+        const newGame = helpers.tick(oldGame);
+        if (helpers.isGameOver(newGame)){
+          setGameOver(true);
+          return oldGame;
+        }
+        return newGame;
+      }),
+    400);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [gameOver]);
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
@@ -36,7 +47,7 @@ function Snake() {
         newDir = "down";
         break;
     }
-    if (newDir !== undefined) {
+    if (newDir !== null) {
       setGame((oldGame) => {
         return { ...oldGame, snake: { ...oldGame.snake, direction: newDir } };
       });
@@ -50,10 +61,8 @@ function Snake() {
       let className = "";
       if (helpers.isEqual(cell, game.snake.head)) {
         className = " head";
-        //console.log(game.food);
       } else if (helpers.isEqual(cell, game.food)) {
         className = " food";
-        //console.log(game.snake.tail);
       } else if (
         game.snake.tail.some((tailCell) => helpers.isEqual(cell, tailCell))
       ) {
